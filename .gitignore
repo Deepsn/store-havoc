@@ -4,3 +4,4 @@
 *.tsbuildinfo
 /.vscode
 /.idea
+.env
