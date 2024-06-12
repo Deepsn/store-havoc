@@ -40,18 +40,20 @@ function ReceiveReplication(world: World, state: ClientState) {
 			const componentsToAdd = new Array<AnyComponent>();
 			const componentsToRemove = new Array<ComponentCtor>();
 
-			for (const [id, componentData] of components) {
-				const component = MatterComponents.get(id);
+			for (const [id, data] of components) {
+				const componentData = MatterComponents.get(id);
 
-				if (!component) {
+				if (!componentData) {
 					continue;
 				}
 
-				if (componentData) {
-					componentsToAdd.push(component(componentData));
+				const { newComponent } = componentData;
+
+				if (data) {
+					componentsToAdd.push(newComponent(data));
 					print(id, componentData, MatterComponents, MatterComponents.get(id));
 				} else {
-					componentsToRemove.push(component);
+					componentsToRemove.push(newComponent);
 				}
 			}
 
