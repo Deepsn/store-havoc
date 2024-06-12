@@ -1,0 +1,30 @@
+{
+  "name": "store-havoc",
+  "version": "1.0.0",
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "build": "rbxtsc",
+    "watch": "rbxtsc -w",
+    "serve": "rojo serve",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.1",
+    "@rbxts/compiler-types": "2.3.0-types.1",
+    "@rbxts/types": "^1.0.780",
+    "husky": "^9.0.11",
+    "roblox-ts": "^2.3.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@rbxts/matter": "^0.8.1",
+    "@rbxts/plasma": "^0.4.5",
+    "@rbxts/rewire": "^0.3.0",
+    "@rbxts/services": "^1.5.4",
+    "@rbxts/webstorm-fix": "^1.0.0"
+  },
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
+}
