@@ -85,3 +85,5 @@ export function startMatter<S extends object>(
 
 	return [world, state];
 }
+
+export type SharedSystem = System<[World]>;
