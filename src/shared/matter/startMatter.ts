@@ -4,10 +4,7 @@ import Plasma from "@rbxts/plasma";
 import { type Context, HotReloader } from "@rbxts/rewire";
 import { RunService, UserInputService } from "@rbxts/services";
 
-export function startMatter<S extends object>(
-	containers: Instance[],
-	state: S,
-): [World, S] {
+export function startMatter<S extends object>(containers: Instance[], state: S): [World, S] {
 	type T = [World, S, Plasma.Widgets];
 	type MatterSystem = System<T>;
 
@@ -23,9 +20,7 @@ export function startMatter<S extends object>(
 	function loadModule(module: ModuleScript, context: Context) {
 		const originalModule = context.originalModule;
 
-		const [success, system] = pcall(require, module) as LuaTuple<
-			[boolean, MatterSystem]
-		>;
+		const [success, system] = pcall(require, module) as LuaTuple<[boolean, MatterSystem]>;
 
 		if (!success) {
 			warn("Error when loading module:", module.Name, system);

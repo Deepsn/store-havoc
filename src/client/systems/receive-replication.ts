@@ -1,12 +1,7 @@
 import { MatterComponents } from "@/shared/matter/component";
 import { useStartup } from "@/shared/matter/hooks/useStartup";
 import { remotes } from "@/shared/remotes";
-import {
-	type AnyComponent,
-	type AnyEntity,
-	type World,
-	useEvent,
-} from "@rbxts/matter";
+import { type AnyComponent, type AnyEntity, type World, useEvent } from "@rbxts/matter";
 import type { ComponentCtor } from "@rbxts/matter/lib/component";
 import type { ClientState, RootSystem } from "../runtime.client";
 
@@ -14,15 +9,10 @@ const localEntityMap = new Map<string, AnyEntity>();
 
 function ReceiveReplication(world: World, state: ClientState) {
 	function debugPrint(...messages: unknown[]) {
-		if (state.debugEnabled) {
-			print(...messages);
-		}
+		print(...messages);
 	}
 
-	for (const [, payload] of useEvent(
-		remotes.matter.replicate,
-		remotes.matter.replicate,
-	)) {
+	for (const [, payload] of useEvent(remotes.matter.replicate, remotes.matter.replicate)) {
 		debugPrint("Received replication from server", payload);
 
 		for (const [serverEntityId, components] of payload) {
@@ -62,9 +52,7 @@ function ReceiveReplication(world: World, state: ClientState) {
 
 				localEntityMap.set(serverEntityId, clientEntityId);
 
-				debugPrint(
-					`Spawned entity ${clientEntityId}(${serverEntityId}) with ${componentsToAdd.join()}`,
-				);
+				debugPrint(`Spawned entity ${clientEntityId}(${serverEntityId}) with ${componentsToAdd.join()}`);
 			} else {
 				if (componentsToAdd.size() > 0) {
 					world.insert(clientEntityId, ...componentsToAdd);

@@ -1,7 +1,4 @@
-import {
-	type ComponentCreator,
-	MatterComponents,
-} from "@/shared/matter/component";
+import { type ComponentCreator, MatterComponents } from "@/shared/matter/component";
 import { useStartup } from "@/shared/matter/hooks/useStartup";
 import type { SharedSystem } from "@/shared/matter/startMatter";
 import type { AnyEntity, World } from "@rbxts/matter";
@@ -28,13 +25,9 @@ function TagComponents(world: World) {
 				spawnComponent(instance, newComponent);
 			}
 
-			CollectionService.GetInstanceAddedSignal(name).Connect((instance) =>
-				spawnComponent(instance, newComponent),
-			);
+			CollectionService.GetInstanceAddedSignal(name).Connect((instance) => spawnComponent(instance, newComponent));
 
-			CollectionService.GetInstanceRemovedSignal(name).Connect(
-				despawnComponent,
-			);
+			CollectionService.GetInstanceRemovedSignal(name).Connect(despawnComponent);
 		}
 	}
 }

@@ -6,10 +6,7 @@ import type { RootSystem } from "../runtime.server";
 function ReplicateComponents(world: World) {
 	const payload = new Map<string, Map<string, AnyComponent>>();
 
-	for (const [, player] of useEvent(
-		remotes.matter.start,
-		remotes.matter.start,
-	)) {
+	for (const [, player] of useEvent(remotes.matter.start, remotes.matter.start)) {
 		for (const [, { newComponent, settings }] of MatterComponents) {
 			if (!settings.replicable) continue;
 

@@ -7,12 +7,16 @@
 		"enabled": true
 	},
 	"formatter": {
-		"lineEnding": "crlf"
+		"lineEnding": "crlf",
+		"lineWidth": 120
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"suspicious": {
+				"noShadowRestrictedNames": "off"
+			},
 			"style": {
 				"noNonNullAssertion": "off"
 			}

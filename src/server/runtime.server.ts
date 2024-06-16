@@ -11,9 +11,6 @@ export interface ServerState {}
 
 const serverState: ServerState = {};
 
-const [world, state] = startMatter(
-	[script.Parent.systems, ReplicatedStorage.Shared.systems],
-	serverState,
-);
+const [world, state] = startMatter([script.Parent.systems, ReplicatedStorage.Shared.systems], serverState);
 
 export type RootSystem = System<[typeof world, typeof state]>;

@@ -15,11 +15,9 @@ interface ComponentData {
 
 export const MatterComponents = new Map<string, ComponentData>();
 
-export function CreateComponent<T extends object>(
-	settings?: ComponentSettings & T,
-) {
+export function CreateComponent<T extends object>(settings?: ComponentSettings & Partial<T>) {
 	const { name, replicable } = settings ?? {};
-	const defaultData = { ...settings, name: undefined, replicatable: undefined };
+	const defaultData = { ...settings, name: undefined, replicable: undefined };
 
 	const componentName = name ?? debug.info(2, "sl").join("@");
 	const componentCreator = component<T>(componentName, defaultData as T);
