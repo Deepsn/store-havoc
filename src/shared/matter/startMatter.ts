@@ -2,7 +2,7 @@ import { IS_CLIENT } from "@/shared/constants/core";
 import { Debugger, Loop, type System, World } from "@rbxts/matter";
 import Plasma from "@rbxts/plasma";
 import { type Context, HotReloader } from "@rbxts/rewire";
-import { RunService, UserInputService } from "@rbxts/services";
+import { ReplicatedStorage, RunService, UserInputService } from "@rbxts/services";
 
 export function startMatter<S extends object>(containers: Instance[], state: S): [World, S] {
 	type T = [World, S, Plasma.Widgets];
@@ -76,6 +76,13 @@ export function startMatter<S extends object>(containers: Instance[], state: S):
 				matterDebugger.toggle();
 			}
 		});
+	}
+
+	// Preload components
+	for (const component of ReplicatedStorage.Shared.components.GetChildren()) {
+		if (!classIs(component, "ModuleScript")) continue;
+
+		require(component);
 	}
 
 	return [world, state];
