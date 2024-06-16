@@ -17,7 +17,7 @@ local t0 = os.clock()
 print("🕒 Compiling typescript files")
 
 local compileT0 = os.clock()
-local compileResult = process.spawn("bun run", {"compile"})
+local compileResult = process.spawn("bun", {"run", "compile"})
 local compileT1 = os.clock()
 
 if compileResult.ok then
@@ -29,7 +29,7 @@ end
 -- Build temporary game place
 print("🕒 Building game place")
 
-local buildResult = process.spawn("bun run", {"build"})
+local buildResult = process.spawn("bun", {"run", "build"})
 
 if buildResult.ok then
     print("🛠️ Built game place")

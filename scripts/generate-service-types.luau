@@ -3,14 +3,25 @@
 local fs = require('@lune/fs')
 local roblox = require('@lune/roblox')
 local env = require("modules/env-reader").config()
+local place = require("modules/place")
 
-local placeFilePath = env.PLACE_FILE_PATH or "game.rbxl"
+local placeId = assert(env.GAME_PLACE_ID, "GAME_PLACE_ID not expecified")
 local outPath = env.OUT_PATH or "src/services.d.ts"
 
-local game = roblox.deserializePlace(fs.readFile(placeFilePath))
+local placeContents = place.download(placeId)
+local game = roblox.deserializePlace(placeContents)
 
-local SERVICE_BLACKLIST = {
-	StarterPlayer = true,
+local SERVICES_TO_GENERATE = {
+	"Workspace",
+	"ReplicatedStorage",
+	"ServerStorage",
+	"StarterGui"
+}
+
+local INSTANCE_BLACKLIST = {
+	"rbxts_include",
+	"REFLEX_DEVTOOLS",
+	"REFLEX_DEVTOOLS_CLIENT"
 }
 
 local output = ""
@@ -44,7 +55,7 @@ local function writeService(service)
 
 	local function search(instance)
 		local name = instance.Name
-		if name == "node_modules" then
+		if table.find(INSTANCE_BLACKLIST, name) ~= nil then
 			return
 		end
 		local prefix = ""
@@ -81,8 +92,8 @@ local function writeService(service)
 	writeLine("")
 end
 
-for _, service in ipairs(game:GetChildren()) do
-	if not SERVICE_BLACKLIST[service.Name] then
+for _, service in game:GetChildren() do
+	if table.find(SERVICES_TO_GENERATE, service.Name) ~= nil then
 		writeService(service)
 	end
 end
