@@ -3,18 +3,17 @@ import { useStartup } from "@/shared/matter/hooks/useStartup";
 import { remotes } from "@/shared/remotes";
 import { type AnyComponent, type AnyEntity, type World, useEvent } from "@rbxts/matter";
 import type { ComponentCtor } from "@rbxts/matter/lib/component";
-import type { ClientState, RootSystem } from "../runtime.client";
+import Object from "@rbxts/object-utils";
+import type { RootSystem } from "../runtime.client";
 
 const localEntityMap = new Map<string, AnyEntity>();
 
-function ReceiveReplication(world: World, state: ClientState) {
+function ReceiveReplication(world: World) {
 	function debugPrint(...messages: unknown[]) {
 		print(...messages);
 	}
 
 	for (const [, payload] of useEvent(remotes.matter.replicate, remotes.matter.replicate)) {
-		debugPrint("Received replication from server", payload);
-
 		for (const [serverEntityId, components] of payload) {
 			let clientEntityId = localEntityMap.get(serverEntityId);
 
@@ -22,48 +21,53 @@ function ReceiveReplication(world: World, state: ClientState) {
 				world.despawn(clientEntityId);
 				localEntityMap.delete(serverEntityId);
 
-				debugPrint(`Entity despawned ${clientEntityId}`);
+				debugPrint(`Entity despawned ${clientEntityId} (${serverEntityId})`);
 
 				continue;
 			}
 
-			const componentsToAdd = new Array<AnyComponent>();
-			const componentsToRemove = new Array<ComponentCtor>();
+			const componentsToAdd = new Map<string, AnyComponent>();
+			const componentsToRemove = new Map<string, ComponentCtor>();
 
-			for (const [id, data] of components) {
-				const componentData = MatterComponents.get(id);
+			for (const [id, { data }] of components) {
+				const { newComponent } = MatterComponents.get(id) ?? {};
 
-				if (!componentData) {
+				if (!newComponent) {
 					continue;
 				}
 
-				const { newComponent } = componentData;
+				if (componentsToAdd.has(id) || componentsToRemove.has(id)) {
+					warn("Component was already added to list");
+					continue;
+				}
 
 				if (data) {
-					componentsToAdd.push(newComponent(data));
-					print(id, componentData, MatterComponents, MatterComponents.get(id));
+					componentsToAdd.set(id, newComponent(data));
 				} else {
-					componentsToRemove.push(newComponent);
+					componentsToRemove.set(id, newComponent);
 				}
 			}
 
 			if (!clientEntityId) {
-				clientEntityId = world.spawn(...componentsToAdd);
+				clientEntityId = world.spawn(...Object.values(componentsToAdd));
 
 				localEntityMap.set(serverEntityId, clientEntityId);
 
-				debugPrint(`Spawned entity ${clientEntityId}(${serverEntityId}) with ${componentsToAdd.join()}`);
+				debugPrint(`Spawned entity ${clientEntityId} (${serverEntityId}) with ${Object.keys(componentsToAdd).join()}`);
 			} else {
 				if (componentsToAdd.size() > 0) {
-					world.insert(clientEntityId, ...componentsToAdd);
+					world.insert(clientEntityId, ...Object.values(componentsToAdd));
 				}
 
 				if (componentsToRemove.size() > 0) {
-					world.remove(clientEntityId, ...componentsToRemove);
+					world.remove(clientEntityId, ...Object.values(componentsToRemove));
 				}
 
+				const componentsNamesToAdd = Object.keys(componentsToAdd);
+				const componentsNamesToRemove = Object.keys(componentsToRemove);
+
 				debugPrint(
-					`Updated entity ${clientEntityId}(${serverEntityId}) with ${componentsToAdd.join()} and removed ${componentsToRemove.join()}`,
+					`Updated entity ${clientEntityId} (${serverEntityId}) with ${componentsNamesToAdd.join()} and removed ${componentsNamesToRemove.join()}`,
 				);
 			}
 		}

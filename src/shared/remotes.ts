@@ -3,7 +3,7 @@ import { type Client, type Server, createRemotes, namespace, remote } from "@rbx
 
 export const remotes = createRemotes({
 	matter: namespace({
-		replicate: remote<Client, [payload: Map<string, Map<string, AnyComponent>>]>(),
+		replicate: remote<Client, [payload: Map<string, Map<string, { data: AnyComponent | undefined }>>]>(),
 		start: remote<Server>(),
 	}),
 });

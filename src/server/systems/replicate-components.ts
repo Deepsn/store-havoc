@@ -3,48 +3,46 @@ import { remotes } from "@/shared/remotes";
 import { type AnyComponent, type World, useEvent } from "@rbxts/matter";
 import type { RootSystem } from "../runtime.server";
 
-function ReplicateComponents(world: World) {
-	const payload = new Map<string, Map<string, AnyComponent>>();
+type ReplicationPayload = Map<string, Map<string, { data: AnyComponent | undefined }>>;
 
-	for (const [, player] of useEvent(remotes.matter.start, remotes.matter.start)) {
-		for (const [, { newComponent, settings }] of MatterComponents) {
-			if (!settings.replicable) continue;
+function ReplicateComponents(world: World) {
+	for (const [, { newComponent, settings }] of MatterComponents) {
+		if (!settings.replicable) continue;
+
+		const componentId = tostring(newComponent);
+
+		for (const [, player] of useEvent(remotes.matter.start, remotes.matter.start)) {
+			const payload: ReplicationPayload = new Map();
 
 			for (const [entityId, componentData] of world.query(newComponent)) {
 				const key = tostring(entityId);
 				const components = payload.get(key) ?? new Map();
-				const componentId = tostring(newComponent);
 
-				components.set(componentId, componentData);
+				components.set(componentId, { data: componentData });
 
 				payload.set(key, components);
 			}
+
+			print(`Sending initial payload to player ${player.Name}`, payload);
+			remotes.matter.replicate.fire(player, payload);
 		}
 
-		print(`Sending initial payload to player ${player.Name}`, payload);
-		remotes.matter.replicate.fire(player, payload);
-	}
+		const changes: ReplicationPayload = new Map();
 
-	payload.clear();
-
-	for (const [, { newComponent, settings }] of MatterComponents) {
-		if (!settings.replicable) continue;
-
-		for (const [entityId, componentData] of world.queryChanged(newComponent)) {
+		for (const [entityId, record] of world.queryChanged(newComponent)) {
 			const key = tostring(entityId);
-			const components = payload.get(key) ?? new Map();
-			const componentId = tostring(newComponent);
+			const components = changes.get(key) ?? new Map();
 
-			if (world.contains(entityId) && componentData.new) {
-				components.set(componentId, componentData.new);
+			if (world.contains(entityId)) {
+				components.set(componentId, { data: record.new });
 			}
 
-			payload.set(key, components);
+			changes.set(key, components);
 		}
-	}
 
-	if (next(payload).size() > 0) {
-		remotes.matter.replicate.fireAll(payload);
+		if (next(changes).size() > 0) {
+			remotes.matter.replicate.fireAll(changes);
+		}
 	}
 }
 
